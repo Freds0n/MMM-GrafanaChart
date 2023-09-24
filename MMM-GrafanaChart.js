@@ -10,11 +10,22 @@ Module.register("MMM-GrafanaChart", {
     // Default module config.
     defaults: {
         protocol: "http", // this is needed, so it can be overwritten in the old-style config
-        url: "invalid",
+        style: "border:0",
+        url1: "",
+        url2: "",
+        height0:"100%",
+        width0:"100%",
+        height1:"100%",
+        width1:"100%",
+        height2:"100%",
+        width2:"100%",
+        html:"",
         height:"100%",
         width:"100%",
         scrolling:"no",
-        refreshInterval: 900
+        gap: "0px",
+        top: "0px",
+        refreshInterval: 86400
     },
 
     // Define start sequence.
@@ -54,19 +65,63 @@ Module.register("MMM-GrafanaChart", {
 
     // Override dom generator.
     getDom: function() {
-        if( ! this.config.url.match(/^https?:/i) ){
-            return document.createTextNode(this.name+" found no usable URL configured. Please check your config!");
+        //if( ! this.config.url.match(/^https?:/i) ){
+        //    return document.createTextNode(this.name+" found no usable URL configured. Please check your config!");
+        //}
+
+        var div = document.createElement("div");
+
+        if(this.config.html != "")
+        {
+                div.innerHTML = this.config.html;
         }
 
-        var iframe = document.createElement("IFRAME");
-        iframe.style = "border:0"
-        iframe.width = this.config.width;
-        iframe.height = this.config.height;
-        iframe.scrolling = this.config.scrolling;
-        iframe.src = this.config.url;
-        // this attribute is used to ensure MagicMirror doesn't throw away our updateDom(), because the DOM object is identical to the previous one
-        iframe.setAttribute("timestamp", new Date().getTime());
-        return iframe;
+        div.width = this.config.width;
+        div.height = this.config.height;
+        div.style = this.config.style;
+
+        var top = document.createElement("div");
+        top.style = "height:"+this.config.top;
+        top.setAttribute("timestamp", new Date().getTime());
+        div.appendChild(top);
+
+        if(this.config.url1 != "")
+        {
+                var iframe1_div = document.createElement("div");
+                iframe1_div.width = this.config.width0;
+                iframe1_div.height = this.config.height0;
+                var iframe1 = document.createElement("IFRAME");
+                iframe1.style = "border:0";
+                iframe1.width = this.config.width1;
+                iframe1.height = this.config.height1;
+                iframe1.scrolling = this.config.scrolling;
+                iframe1.src = this.config.url1;
+                iframe1.setAttribute("timestamp", new Date().getTime());
+                iframe1_div.appendChild(iframe1);
+                iframe1_div.setAttribute("timestamp", new Date().getTime());
+                div.appendChild(iframe1_div);
+        }
+
+        var spacer = document.createElement("div");
+        spacer.style = "height:"+this.config.gap;
+        spacer.setAttribute("timestamp", new Date().getTime());
+        div.appendChild(spacer);
+
+        if(this.config.url2 != "")
+        {
+                var iframe2 = document.createElement("IFRAME");
+                iframe2.style = "border:0";
+                iframe2.width = this.config.width2;
+                iframe2.height = this.config.height2;
+                iframe2.scrolling = this.config.scrolling;
+                iframe2.src = this.config.url2;
+                iframe2.setAttribute("timestamp", new Date().getTime());
+                div.appendChild(iframe2);
+        }
+
+        div.setAttribute("timestamp", new Date().getTime());
+
+        return div;
     },
     scheduleUpdate: function() {
         var self = this;
